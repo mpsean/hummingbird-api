@@ -10,10 +10,6 @@ RUN dotnet restore Hummingbird.API.Tests/Hummingbird.API.Tests.csproj
 
 COPY . .
 
-# Pre-build so the CMD can skip the build step
-RUN dotnet build Hummingbird.API.Tests/Hummingbird.API.Tests.csproj -c Debug --no-restore
-
 CMD ["dotnet", "test", "Hummingbird.API.Tests/Hummingbird.API.Tests.csproj", \
      "--verbosity", "normal", \
-     "--no-build", \
      "--logger", "junit;LogFilePath=/TestResults/junit-results.xml"]
