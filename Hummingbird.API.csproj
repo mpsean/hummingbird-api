@@ -9,6 +9,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Exclude the test project — the SDK glob would otherwise pull its .cs files in -->
+    <Compile Remove="Hummingbird.API.Tests/**" />
+    <Content Remove="Hummingbird.API.Tests/**" />
+    <EmbeddedResource Remove="Hummingbird.API.Tests/**" />
+    <None Remove="Hummingbird.API.Tests/**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.3">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>

@@ -30,6 +30,18 @@ pipeline {
             }
         }
 
+        stage('Test') {
+            steps {
+                sh 'sh ./jenkins/scripts/test.sh'
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true,
+                          testResults: 'Hummingbird.API.Tests/TestResults/junit-results.xml'
+                }
+            }
+        }
+
         stage('Build And Push Image') {
             steps {
                 withCredentials([usernamePassword(credentialsId: params.DOCKER_CREDENTIALS_ID, usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
