@@ -1,0 +1,19 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0
+WORKDIR /src
+
+# Restore in separate layers so Docker cache is reused on unchanged deps
+COPY Hummingbird.API.csproj .
+RUN dotnet restore Hummingbird.API.csproj
+
+COPY Hummingbird.API.Tests/Hummingbird.API.Tests.csproj Hummingbird.API.Tests/
+RUN dotnet restore Hummingbird.API.Tests/Hummingbird.API.Tests.csproj
+
+COPY . .
+
+# Pre-build so the CMD can skip the build step
+RUN dotnet build Hummingbird.API.Tests/Hummingbird.API.Tests.csproj -c Debug --no-restore
+
+CMD ["dotnet", "test", "Hummingbird.API.Tests/Hummingbird.API.Tests.csproj", \
+     "--verbosity", "normal", \
+     "--no-build", \
+     "--logger", "junit;LogFilePath=/TestResults/junit-results.xml"]
