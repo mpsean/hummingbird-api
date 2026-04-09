@@ -3044,19 +3044,19 @@
     ]
   },
   "packageFolders": {
-    "/Users/mpsc/.nuget/packages/": {}
+    "/Users/pemapol/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/mpsc/Maipro/06_Programming/Senior/Modules/hummingbird-api/Hummingbird.API.csproj",
+      "projectUniqueName": "/Users/pemapol/Documents/GitHub/hummingbird-api/Hummingbird.API.csproj",
       "projectName": "Hummingbird.API",
-      "projectPath": "/Users/mpsc/Maipro/06_Programming/Senior/Modules/hummingbird-api/Hummingbird.API.csproj",
-      "packagesPath": "/Users/mpsc/.nuget/packages/",
-      "outputPath": "/Users/mpsc/Maipro/06_Programming/Senior/Modules/hummingbird-api/obj/",
+      "projectPath": "/Users/pemapol/Documents/GitHub/hummingbird-api/Hummingbird.API.csproj",
+      "packagesPath": "/Users/pemapol/.nuget/packages/",
+      "outputPath": "/Users/pemapol/Documents/GitHub/hummingbird-api/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/Users/mpsc/.nuget/NuGet/NuGet.Config"
+        "/Users/pemapol/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -3080,7 +3080,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "10.0.200"
+      "SdkAnalysisLevel": "10.0.100"
     },
     "frameworks": {
       "net8.0": {
@@ -3138,6 +3138,20 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
+        "downloadDependencies": [
+          {
+            "name": "Microsoft.AspNetCore.App.Ref",
+            "version": "[8.0.22, 8.0.22]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Host.osx-arm64",
+            "version": "[8.0.22, 8.0.22]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Ref",
+            "version": "[8.0.22, 8.0.22]"
+          }
+        ],
         "frameworkReferences": {
           "Microsoft.AspNetCore.App": {
             "privateAssets": "none"
@@ -3146,7 +3160,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/10.0.201/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/10.0.101/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

@@ -1,0 +1,64 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'DOCKER_CREDENTIALS_ID', defaultValue: 'dockerhub-credentials', description: 'Jenkins Username/Password credentials ID for Docker Hub')
+        string(name: 'DOCKER_IMAGE', defaultValue: 'mpsean/hummingbird-api', description: 'Docker image repository (e.g. username/repository)')
+    }
+
+    options {
+        skipDefaultCheckout(true)
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '20'))
+        timeout(time: 40, unit: 'MINUTES')
+    }
+
+    triggers {
+        pollSCM('H/2 * * * *')
+    }
+
+    environment {
+        CI = 'true'
+        DOCKER_IMAGE = "${params.DOCKER_IMAGE}"
+    }
+
+    stages {
+        stage('Checkout Source') {
+            steps {
+                deleteDir()
+                checkout scm
+            }
+        }
+
+        stage('Build And Push Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: params.DOCKER_CREDENTIALS_ID, usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
+                    sh '''#!/bin/sh
+set -eu
+
+if ! command -v docker >/dev/null 2>&1; then
+    echo 'docker CLI is required on the Jenkins agent for direct build/push mode.' >&2
+    exit 1
+fi
+
+docker build \
+  -f Dockerfile \
+  -t "${DOCKER_IMAGE}:${BUILD_NUMBER}" \
+  -t "${DOCKER_IMAGE}:latest" \
+  .
+
+export IMAGE_TAG="${BUILD_NUMBER}"
+sh ./jenkins/scripts/deliver.sh
+'''
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            sh 'docker system prune -f --volumes'
+            deleteDir()
+        }
+    }
+}

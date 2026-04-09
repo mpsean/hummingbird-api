@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Hummingbird.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2e428e29c57014c88f1983dce168a305bcd182b5")]
 [assembly: System.Reflection.AssemblyProductAttribute("Hummingbird.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Hummingbird.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
