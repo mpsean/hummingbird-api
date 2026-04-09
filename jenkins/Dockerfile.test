@@ -1,11 +1,11 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0
 WORKDIR /src
 
-# Restore in separate layers so Docker cache is reused on unchanged deps
+# Copy both csproj files first so Docker can cache the restore layer
 COPY Hummingbird.API.csproj .
-RUN dotnet restore Hummingbird.API.csproj
-
 COPY Hummingbird.API.Tests/Hummingbird.API.Tests.csproj Hummingbird.API.Tests/
+
+# Single restore covers both projects (including PrivateAssets analyzers in the main csproj)
 RUN dotnet restore Hummingbird.API.Tests/Hummingbird.API.Tests.csproj
 
 COPY . .
