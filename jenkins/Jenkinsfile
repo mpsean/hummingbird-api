@@ -3,7 +3,7 @@ pipeline {
 
     parameters {
         string(name: 'DOCKER_CREDENTIALS_ID', defaultValue: 'dockerhub-credentials', description: 'Jenkins Username/Password credentials ID for Docker Hub')
-        string(name: 'DOCKER_IMAGE', defaultValue: 'mpsean/hummingbird-api', description: 'Docker image repository (e.g. username/repository)')
+        string(name: 'DOCKER_IMAGE', defaultValue: 'pemapol/hummingbird-api', description: 'Docker image repository (e.g. username/repository)')
     }
 
     options {

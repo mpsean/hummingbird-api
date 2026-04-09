@@ -3,7 +3,7 @@
 set -e
 
 if [ -z "${DOCKER_IMAGE:-}" ]; then
-	echo 'DOCKER_IMAGE is required, for example: mpsean/hummingbird-api' >&2
+	echo 'DOCKER_IMAGE is required, for example: pemapol/hummingbird-api' >&2
 	exit 1
 fi
 
