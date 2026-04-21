@@ -88,7 +88,6 @@ app.UseCors();
 
 // Resolve tenant from subdomain on every non-admin request
 app.UseMiddleware<TenantResolutionMiddleware>();
-app.UseMiddleware<JwtTenantAuthMiddleware>();
 
 app.MapControllers();
 
