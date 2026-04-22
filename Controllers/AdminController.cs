@@ -5,6 +5,7 @@ using Hummingbird.API.Models;
 using Hummingbird.API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace Hummingbird.API.Controllers;
 
@@ -147,6 +148,63 @@ public class AdminController : ControllerBase
         await _master.SaveChangesAsync();
 
         return Ok(new { message = $"Tenant '{tenant.Subdomain}' is now {(dto.IsActive ? "active" : "inactive")}." });
+    }
+
+    [HttpDelete("tenants/{id}")]
+    public async Task<IActionResult> DeleteTenant(int id)
+    {
+        var tenant = await _master.Tenants.FindAsync(id);
+        if (tenant == null) return NotFound();
+
+        var warnings = new List<string>();
+
+        // 1. Drop the tenant PostgreSQL database.
+        //    Must use a raw connection — DROP DATABASE cannot run inside a transaction
+        //    and requires killing active connections first.
+        try
+        {
+            var masterConnStr = _master.Database.GetConnectionString()!;
+            await using var conn = new NpgsqlConnection(masterConnStr);
+            await conn.OpenAsync();
+
+            await using (var cmd = conn.CreateCommand())
+            {
+                cmd.CommandText = $"SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '{tenant.DatabaseName}' AND pid <> pg_backend_pid()";
+                await cmd.ExecuteNonQueryAsync();
+            }
+
+            await using (var cmd = conn.CreateCommand())
+            {
+                cmd.CommandText = $"DROP DATABASE IF EXISTS \"{tenant.DatabaseName}\"";
+                await cmd.ExecuteNonQueryAsync();
+            }
+
+            _logger.LogInformation("Dropped database {Database} for tenant {Id}", tenant.DatabaseName, id);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to drop database {Database} for tenant {Id}", tenant.DatabaseName, id);
+            warnings.Add($"Database drop failed: {ex.Message}");
+        }
+
+        // 2. Remove from master registry
+        _master.Tenants.Remove(tenant);
+        await _master.SaveChangesAsync();
+
+        // 3. Delete K8s namespace (cascades to deployment, service, pods, IngressRoute)
+        var k8sResult = await _k8s.DeprovisionTenantAsync(tenant.Subdomain);
+        if (!k8sResult.Success)
+        {
+            _logger.LogWarning(
+                "K8s deprovisioning failed for tenant {Subdomain}: {Error}",
+                tenant.Subdomain, k8sResult.ErrorMessage);
+            warnings.Add($"Kubernetes deprovisioning failed: {k8sResult.ErrorMessage}");
+        }
+
+        if (warnings.Count > 0)
+            return Ok(new { message = $"Tenant '{tenant.Subdomain}' removed from registry.", warnings });
+
+        return Ok(new { message = $"Tenant '{tenant.Subdomain}' fully deleted." });
     }
 
     // ── Tenant Config ─────────────────────────────────────────────────────────

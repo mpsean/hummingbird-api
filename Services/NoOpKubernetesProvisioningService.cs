@@ -4,4 +4,7 @@ public sealed class NoOpKubernetesProvisioningService : IKubernetesProvisioningS
 {
     public Task<KubernetesProvisioningResult> ProvisionTenantAsync(string subdomain)
         => Task.FromResult(new KubernetesProvisioningResult(Success: true));
+
+    public Task<KubernetesProvisioningResult> DeprovisionTenantAsync(string subdomain)
+        => Task.FromResult(new KubernetesProvisioningResult(Success: true));
 }

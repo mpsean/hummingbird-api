@@ -48,6 +48,33 @@ public sealed class KubernetesProvisioningService : IKubernetesProvisioningServi
         }
     }
 
+    public async Task<KubernetesProvisioningResult> DeprovisionTenantAsync(string subdomain)
+    {
+        var ns = $"tenant-{subdomain}";
+        try
+        {
+            await _client.CoreV1.DeleteNamespaceAsync(
+                ns,
+                new V1DeleteOptions { PropagationPolicy = "Background" });
+
+            _logger.LogInformation(
+                "K8s deprovisioning complete for tenant {Subdomain} — namespace {Namespace} deleted",
+                subdomain, ns);
+
+            return new KubernetesProvisioningResult(Success: true);
+        }
+        catch (HttpOperationException ex) when ((int)ex.Response.StatusCode == 404)
+        {
+            _logger.LogDebug("Namespace {Namespace} not found during deprovisioning, skipping", ns);
+            return new KubernetesProvisioningResult(Success: true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "K8s deprovisioning failed for tenant {Subdomain}", subdomain);
+            return new KubernetesProvisioningResult(Success: false, ErrorMessage: ex.Message);
+        }
+    }
+
     private async Task CreateNamespaceAsync(string ns)
     {
         try
