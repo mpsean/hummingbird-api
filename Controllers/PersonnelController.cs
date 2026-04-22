@@ -247,6 +247,8 @@ public class PersonnelController : ControllerBase
         var existingCodes = (await _db.Employees.Select(e => e.EmployeeCode).ToListAsync())
                             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
+        var positionMap = positions.ToDictionary(p => p.Name, p => p, StringComparer.OrdinalIgnoreCase);
+
         var config = new CsvConfiguration(CultureInfo.InvariantCulture)
         {
             HasHeaderRecord = true,
@@ -266,13 +268,13 @@ public class PersonnelController : ControllerBase
             row++;
             try
             {
-                var code       = csv.GetField("Employee_ID")?.Trim() ?? "";
-                var name       = csv.GetField("Name")?.Trim() ?? "";
-                var surname    = csv.GetField("Surname")?.Trim() ?? "";
-                var posName    = csv.GetField("Position")?.Trim() ?? "";
-                var salaryStr  = csv.GetField("Salary")?.Trim() ?? "";
-                var dateStr    = csv.GetField("Date_Joined")?.Trim() ?? "";
-                var statusStr  = csv.GetField("Status")?.Trim() ?? "Active";
+                var code      = csv.GetField("Employee_ID")?.Trim() ?? "";
+                var name      = csv.GetField("Name")?.Trim() ?? "";
+                var surname   = csv.GetField("Surname")?.Trim() ?? "";
+                var posName   = csv.GetField("Position")?.Trim() ?? "";
+                var salaryStr = csv.GetField("Salary")?.Trim() ?? "";
+                var dateStr   = csv.GetField("Date_Joined")?.Trim() ?? "";
+                var statusStr = csv.GetField("Status")?.Trim() ?? "Active";
 
                 if (string.IsNullOrWhiteSpace(code))
                 {
@@ -288,22 +290,36 @@ public class PersonnelController : ControllerBase
                     continue;
                 }
 
-                // Position lookup
-                var position = positions.FirstOrDefault(p =>
-                    p.Name.Equals(posName, StringComparison.OrdinalIgnoreCase));
-                if (position == null)
-                {
-                    result.Errors++;
-                    result.ErrorMessages.Add($"Row {row}: Unknown position '{posName}'.");
-                    continue;
-                }
-
-                // Salary
+                // Salary (parsed early so new positions can use it as DefaultSalary)
                 if (!decimal.TryParse(salaryStr, NumberStyles.Any, CultureInfo.InvariantCulture, out var salary))
                 {
                     result.Errors++;
                     result.ErrorMessages.Add($"Row {row}: Invalid salary '{salaryStr}'.");
                     continue;
+                }
+
+                // Position — auto-create with defaults if not found
+                if (!positionMap.TryGetValue(posName, out var position))
+                {
+                    if (string.IsNullOrWhiteSpace(posName))
+                    {
+                        result.Errors++;
+                        result.ErrorMessages.Add($"Row {row}: Position is empty.");
+                        continue;
+                    }
+                    position = new Position
+                    {
+                        Name = posName,
+                        DefaultSalary = salary,
+                        ShiftType = ShiftType.Morning,
+                        ClockInTime = TimeSpan.FromHours(8),
+                        ClockOutTime = TimeSpan.FromHours(17),
+                        TotalHours = 9,
+                        ServiceChargePercentage = 0
+                    };
+                    _db.Positions.Add(position);
+                    positionMap[posName] = position;
+                    result.PositionsCreated++;
                 }
 
                 // Date — force UTC to avoid timezone shift on save
@@ -320,16 +336,23 @@ public class PersonnelController : ControllerBase
                 if (!Enum.TryParse<EmployeeStatus>(statusStr, true, out var empStatus))
                     empStatus = EmployeeStatus.Active;
 
-                _db.Employees.Add(new Employee
+                var emp = new Employee
                 {
                     EmployeeCode = code,
                     Name = name,
                     Surname = surname,
-                    PositionId = position.Id,
                     Salary = salary,
                     DateJoined = dateJoined,
                     Status = empStatus
-                });
+                };
+
+                // New positions have Id=0 until saved — use navigation property so EF resolves the FK
+                if (position.Id == 0)
+                    emp.Position = position;
+                else
+                    emp.PositionId = position.Id;
+
+                _db.Employees.Add(emp);
 
                 existingCodes.Add(code); // prevent intra-file duplicates
                 result.Imported++;
@@ -341,7 +364,7 @@ public class PersonnelController : ControllerBase
             }
         }
 
-        if (result.Imported > 0)
+        if (result.Imported > 0 || result.PositionsCreated > 0)
             await _db.SaveChangesAsync();
 
         return result;
