@@ -23,6 +23,12 @@ public class TimeAttendanceService
         var positions = await _db.Positions.ToListAsync();
         var employees = await _db.Employees.Include(e => e.Position).ToListAsync();
 
+        var existingKeys = await _db.TimeAttendanceRecords
+            .Select(t => new { t.EmployeeCode, t.Date })
+            .ToListAsync();
+        var seenKeys = new HashSet<(string, DateTime)>(
+            existingKeys.Select(k => (k.EmployeeCode, k.Date)));
+
         var config = new CsvConfiguration(CultureInfo.InvariantCulture)
         {
             HasHeaderRecord = true,
@@ -60,10 +66,7 @@ public class TimeAttendanceService
                 // Normalize to UTC date-only (Kind=Utc midnight)
                 var dateUtc = DateTime.SpecifyKind(date.Date, DateTimeKind.Utc);
 
-                // Check for duplicate
-                var exists = await _db.TimeAttendanceRecords
-                    .AnyAsync(t => t.EmployeeCode == employeeCode && t.Date == dateUtc);
-                if (exists)
+                if (!seenKeys.Add((employeeCode, dateUtc)))
                 {
                     result.Skipped++;
                     continue;

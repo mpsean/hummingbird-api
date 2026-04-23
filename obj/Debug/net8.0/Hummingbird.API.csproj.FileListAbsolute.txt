@@ -231,3 +231,4 @@
 /Users/pemapol/Documents/GitHub/hummingbird-api/obj/Debug/net8.0/Hummingb.53FE923B.Up2Date
 /Users/pemapol/Documents/GitHub/hummingbird-api/obj/Debug/net8.0/Hummingbird.API.genruntimeconfig.cache
 /Users/pemapol/Documents/GitHub/hummingbird-api/obj/Debug/net8.0/ref/Hummingbird.API.dll
+/Users/mpsc/Maipro/06_Programming/Senior/Modules/hummingbird-api/obj/Debug/net8.0/Hummingbird.API.sourcelink.json
