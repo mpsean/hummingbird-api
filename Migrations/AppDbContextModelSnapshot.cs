@@ -39,8 +39,7 @@ namespace Hummingbird.API.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasConversion(v => v, v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Value")
                         .IsRequired()
@@ -59,7 +58,7 @@ namespace Hummingbird.API.Migrations
                             Id = 1,
                             Description = "A = Fix-rate per employee, B = Workday-rate",
                             Key = "ServiceChargeVersion",
-                            UpdatedAt = new DateTime(2026, 4, 6, 13, 14, 15, 157, DateTimeKind.Utc).AddTicks(4210),
+                            UpdatedAt = new DateTime(2026, 4, 24, 12, 10, 14, 423, DateTimeKind.Utc).AddTicks(6890),
                             Value = "A"
                         },
                         new
@@ -67,7 +66,7 @@ namespace Hummingbird.API.Migrations
                             Id = 2,
                             Description = "Company / property name",
                             Key = "CompanyName",
-                            UpdatedAt = new DateTime(2026, 4, 6, 13, 14, 15, 157, DateTimeKind.Utc).AddTicks(4210),
+                            UpdatedAt = new DateTime(2026, 4, 24, 12, 10, 14, 423, DateTimeKind.Utc).AddTicks(6890),
                             Value = "My Hotel"
                         },
                         new
@@ -75,7 +74,7 @@ namespace Hummingbird.API.Migrations
                             Id = 3,
                             Description = "Whether initial setup has been completed",
                             Key = "Onboarded",
-                            UpdatedAt = new DateTime(2026, 4, 6, 13, 14, 15, 157, DateTimeKind.Utc).AddTicks(4210),
+                            UpdatedAt = new DateTime(2026, 4, 24, 12, 10, 14, 423, DateTimeKind.Utc).AddTicks(6890),
                             Value = "false"
                         });
                 });
@@ -89,8 +88,7 @@ namespace Hummingbird.API.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("DateJoined")
-                        .HasColumnType("timestamp with time zone")
-                        .HasConversion(v => v, v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("EmployeeCode")
                         .IsRequired()
@@ -121,6 +119,8 @@ namespace Hummingbird.API.Migrations
 
                     b.HasIndex("PositionId");
 
+                    b.HasIndex("Status");
+
                     b.ToTable("Employees");
                 });
 
@@ -136,8 +136,7 @@ namespace Hummingbird.API.Migrations
                         .HasColumnType("numeric(18,2)");
 
                     b.Property<DateTime>("CalculatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasConversion(v => v, v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal>("Deductions")
                         .HasColumnType("numeric(18,2)");
@@ -177,6 +176,8 @@ namespace Hummingbird.API.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Year", "Month");
 
                     b.HasIndex("EmployeeId", "Month", "Year")
                         .IsUnique();
@@ -223,13 +224,13 @@ namespace Hummingbird.API.Migrations
                         new
                         {
                             Id = 1,
-                            ClockInTime = new TimeSpan(0, 8, 0, 0, 0),
-                            ClockOutTime = new TimeSpan(0, 17, 0, 0, 0),
+                            ClockInTime = new TimeSpan(0, 10, 0, 0, 0),
+                            ClockOutTime = new TimeSpan(0, 14, 0, 0, 0),
                             DefaultSalary = 15000m,
                             Name = "Food and Beverage",
-                            ServiceChargePercentage = 25m,
+                            ServiceChargePercentage = 60m,
                             ShiftType = "Morning",
-                            TotalHours = 9m
+                            TotalHours = 4m
                         },
                         new
                         {
@@ -249,20 +250,20 @@ namespace Hummingbird.API.Migrations
                             ClockOutTime = new TimeSpan(0, 17, 0, 0, 0),
                             DefaultSalary = 18000m,
                             Name = "Receptionist",
-                            ServiceChargePercentage = 30m,
+                            ServiceChargePercentage = 20m,
                             ShiftType = "Morning",
                             TotalHours = 9m
                         },
                         new
                         {
                             Id = 4,
-                            ClockInTime = new TimeSpan(0, 8, 0, 0, 0),
+                            ClockInTime = new TimeSpan(0, 9, 0, 0, 0),
                             ClockOutTime = new TimeSpan(0, 17, 0, 0, 0),
                             DefaultSalary = 35000m,
                             Name = "Manager",
-                            ServiceChargePercentage = 25m,
+                            ServiceChargePercentage = 0m,
                             ShiftType = "Morning",
-                            TotalHours = 9m
+                            TotalHours = 8m
                         });
                 });
 
@@ -281,7 +282,7 @@ namespace Hummingbird.API.Migrations
                         .HasColumnType("interval");
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Department")
                         .IsRequired()
@@ -318,6 +319,8 @@ namespace Hummingbird.API.Migrations
 
                     b.HasIndex("EmployeeCode", "Date")
                         .IsUnique();
+
+                    b.HasIndex("Year", "Month");
 
                     b.ToTable("TimeAttendanceRecords");
                 });

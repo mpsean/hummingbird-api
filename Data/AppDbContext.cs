@@ -20,6 +20,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Employee>(e =>
         {
             e.HasIndex(x => x.EmployeeCode).IsUnique();
+            e.HasIndex(x => x.Status);
             e.Property(x => x.Salary).HasColumnType("numeric(18,2)");
             e.Property(x => x.Status).HasConversion<string>();
             e.HasOne(x => x.Position)
@@ -39,12 +40,14 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<TimeAttendanceRecord>(t =>
         {
             t.HasIndex(x => new { x.EmployeeCode, x.Date }).IsUnique();
+            t.HasIndex(x => new { x.Year, x.Month });
             t.Property(x => x.TotalHours).HasColumnType("numeric(5,2)");
         });
 
         modelBuilder.Entity<PayrollRecord>(p =>
         {
             p.HasIndex(x => new { x.EmployeeId, x.Month, x.Year }).IsUnique();
+            p.HasIndex(x => new { x.Year, x.Month });
             p.Property(x => x.BaseSalary).HasColumnType("numeric(18,2)");
             p.Property(x => x.Deductions).HasColumnType("numeric(18,2)");
             p.Property(x => x.ServiceChargeBonus).HasColumnType("numeric(18,2)");

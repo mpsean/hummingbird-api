@@ -25,13 +25,14 @@ builder.Services.AddDbContext<MasterDbContext>(options =>
 builder.Services.AddScoped<TenantContext>();
 builder.Services.AddScoped<ITenantContext>(sp => sp.GetRequiredService<TenantContext>());
 
-// Tenant database (scoped — connection string resolved from ITenantContext at request time)
+// Tenant database (scoped — connection string resolved from ITenantContext at request time).
+// When no tenant is resolved (design-time tooling, admin routes), leave the provider unconfigured:
+// any query attempt will fail with a clear EF "no provider configured" error.
 builder.Services.AddDbContext<AppDbContext>((sp, options) =>
 {
     var tenant = sp.GetRequiredService<ITenantContext>();
-    if (!tenant.IsResolved)
-        throw new InvalidOperationException("Tenant not resolved. AppDbContext is unavailable for this route.");
-    options.UseNpgsql(tenant.ConnectionString);
+    if (tenant.IsResolved)
+        options.UseNpgsql(tenant.ConnectionString);
 });
 
 // Application services
