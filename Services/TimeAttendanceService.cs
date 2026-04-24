@@ -130,6 +130,12 @@ public class TimeAttendanceService
 
                 _db.TimeAttendanceRecords.Add(record);
                 result.Imported++;
+
+                if (result.Imported % 1000 == 0)
+                {
+                    await _db.SaveChangesAsync();
+                    _db.ChangeTracker.Clear();
+                }
             }
             catch (Exception ex)
             {
@@ -138,7 +144,7 @@ public class TimeAttendanceService
             }
         }
 
-        if (result.Imported > 0)
+        if (_db.ChangeTracker.HasChanges())
             await _db.SaveChangesAsync();
 
         // Set month/year from first imported record
