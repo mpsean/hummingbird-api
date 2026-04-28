@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-
+#test ci-cd time
 set -e
 
 if [ -z "${DOCKER_IMAGE:-}" ]; then
