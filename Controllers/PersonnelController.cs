@@ -15,6 +15,14 @@ public class PersonnelController : ControllerBase
 {
     private readonly AppDbContext _db;
 
+    private static readonly string[] DateFormats =
+    {
+        "dd/MM/yyyy",
+        "d/M/yyyy",
+        "yyyy-MM-dd",
+        "MM/dd/yyyy",
+    };
+
     public PersonnelController(AppDbContext db)
     {
         _db = db;
@@ -322,8 +330,9 @@ public class PersonnelController : ControllerBase
                     result.PositionsCreated++;
                 }
 
-                // Date — force UTC to avoid timezone shift on save
-                if (!DateTime.TryParse(dateStr, CultureInfo.InvariantCulture,
+                // Date — accept dd/MM/yyyy, d/M/yyyy, yyyy-MM-dd, MM/dd/yyyy.
+                // Force UTC to avoid timezone shift on save.
+                if (!DateTime.TryParseExact(dateStr, DateFormats, CultureInfo.InvariantCulture,
                         DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var dateRaw))
                 {
                     result.Errors++;

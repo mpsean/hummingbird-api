@@ -12,6 +12,14 @@ public class TimeAttendanceService
 {
     private readonly AppDbContext _db;
 
+    private static readonly string[] DateFormats =
+    {
+        "dd/MM/yyyy",
+        "d/M/yyyy",
+        "yyyy-MM-dd",
+        "MM/dd/yyyy",
+    };
+
     public TimeAttendanceService(AppDbContext db)
     {
         _db = db;
@@ -55,7 +63,7 @@ public class TimeAttendanceService
                 var clockOutStr = csv.GetField("Clock_Out") ?? "";
                 var totalHoursStr = csv.GetField("Total_Hours") ?? "0";
 
-                if (!DateTime.TryParse(dateStr, CultureInfo.InvariantCulture,
+                if (!DateTime.TryParseExact(dateStr, DateFormats, CultureInfo.InvariantCulture,
                         DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var date))
                 {
                     result.Errors++;
